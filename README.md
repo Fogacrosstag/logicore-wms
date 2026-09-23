@@ -1,5 +1,5 @@
 # LogiCore WMS
-
+[![build-test-demo](https://github.com/Fogacrosstag/logicore-wms/actions/workflows/ci.yml/badge.svg)](https://github.com/Fogacrosstag/logicore-wms/actions/workflows/ci.yml)
 **An event-driven warehouse management backend built with Java 21 and Go.**
 
 Seven independently deployable services cover receiving, automatic put-away, lot-level inventory, reservations, shipments and a searchable audit trail. The project focuses on correctness at service boundaries: concurrent stock changes, duplicate delivery, transactional event publication and asynchronous confirmation.

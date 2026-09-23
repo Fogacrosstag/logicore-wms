@@ -1,0 +1,38 @@
+global:
+  scrape_interval: 10s
+scrape_configs:
+- job_name: warehouse
+  metrics_path: /metrics
+  static_configs:
+  - targets:
+    - warehouse-service:8080
+- job_name: product
+  metrics_path: /metrics
+  static_configs:
+  - targets:
+    - product-service:8080
+- job_name: inventory
+  metrics_path: /metrics
+  static_configs:
+  - targets:
+    - inventory-service:8080
+- job_name: placement
+  metrics_path: /metrics
+  static_configs:
+  - targets:
+    - placement-service:8080
+- job_name: reservation
+  metrics_path: /metrics
+  static_configs:
+  - targets:
+    - reservation-service:8080
+- job_name: shipment
+  metrics_path: /metrics
+  static_configs:
+  - targets:
+    - shipment-service:8080
+- job_name: audit
+  metrics_path: /metrics
+  static_configs:
+  - targets:
+    - audit-service:8080

@@ -1,0 +1,21 @@
+[WARNING] Tests run: 1, Failures: 0, Errors: 0, Skipped: 1, Time elapsed: 0.010 s -- in dev.logicore.warehouse.ApplicationTest
+[WARNING] Tests run: 1, Failures: 0, Errors: 0, Skipped: 1
+[WARNING] Tests run: 1, Failures: 0, Errors: 0, Skipped: 1, Time elapsed: 0.003 s -- in dev.logicore.product.ApplicationTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 11.42 s -- in dev.logicore.product.ProductServiceTest
+[WARNING] Tests run: 3, Failures: 0, Errors: 0, Skipped: 1
+[WARNING] Tests run: 1, Failures: 0, Errors: 0, Skipped: 1, Time elapsed: 0.006 s -- in dev.logicore.reservation.ApplicationTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 11.20 s -- in dev.logicore.reservation.ReservationServiceTest
+[WARNING] Tests run: 3, Failures: 0, Errors: 0, Skipped: 1
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.057 s -- in dev.logicore.shipment.StateMachineTest
+[WARNING] Tests run: 1, Failures: 0, Errors: 0, Skipped: 1, Time elapsed: 0 s -- in dev.logicore.shipment.ApplicationTest
+[WARNING] Tests run: 2, Failures: 0, Errors: 0, Skipped: 1
+[INFO] Reactor Summary for logicore-wms 1.0.0:
+[INFO] logicore-wms ....................................... SUCCESS [  0.002 s]
+[INFO] java-common ........................................ SUCCESS [  2.760 s]
+[INFO] warehouse-service .................................. SUCCESS [  3.583 s]
+[INFO] product-service .................................... SUCCESS [ 15.174 s]
+[INFO] reservation-service ................................ SUCCESS [ 13.290 s]
+[INFO] shipment-service ................................... SUCCESS [  2.417 s]
+[INFO] BUILD SUCCESS
+[INFO] Total time:  37.531 s
+All four executable Spring Boot JAR files were opened and passed ZIP CRC verification.

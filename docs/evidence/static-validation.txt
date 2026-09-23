@@ -1,0 +1,6 @@
+docker compose config --quiet: PASS (Compose v2.35.1)
+OpenAPI 3.0 validation: PASS, 34 paths
+Go vet: PASS
+Go build -buildvcs=false ./...: PASS
+Python compileall scripts/ tests/: PASS
+Maven POM / YAML / JSON parsing: PASS

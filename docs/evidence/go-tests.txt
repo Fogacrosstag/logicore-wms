@@ -1,0 +1,12 @@
+ok  	github.com/logicore-wms/logicore-wms/libs/platform	1.057s
+?   	github.com/logicore-wms/logicore-wms/services/audit-service	[no test files]
+?   	github.com/logicore-wms/logicore-wms/services/audit-service/cmd	[no test files]
+?   	github.com/logicore-wms/logicore-wms/services/audit-service/internal/application	[no test files]
+?   	github.com/logicore-wms/logicore-wms/services/inventory-service	[no test files]
+?   	github.com/logicore-wms/logicore-wms/services/inventory-service/cmd	[no test files]
+?   	github.com/logicore-wms/logicore-wms/services/inventory-service/internal/application	[no test files]
+ok  	github.com/logicore-wms/logicore-wms/services/inventory-service/internal/domain	1.094s
+?   	github.com/logicore-wms/logicore-wms/services/placement-service	[no test files]
+?   	github.com/logicore-wms/logicore-wms/services/placement-service/cmd	[no test files]
+?   	github.com/logicore-wms/logicore-wms/services/placement-service/internal/application	[no test files]
+ok  	github.com/logicore-wms/logicore-wms/services/placement-service/internal/domain	1.057s

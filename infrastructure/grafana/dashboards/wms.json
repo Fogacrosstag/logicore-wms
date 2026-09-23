@@ -1,0 +1,145 @@
+{
+  "uid": "logicore-wms",
+  "title": "LogiCore WMS",
+  "schemaVersion": 40,
+  "version": 1,
+  "refresh": "10s",
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Healthy services",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "up",
+          "refId": "A",
+          "legendFormat": "{{job}} {{operation}} {{outcome}}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Go business operations / second",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "sum by (service, operation, outcome) (rate(wms_operations_total[5m]))",
+          "refId": "A",
+          "legendFormat": "{{job}} {{operation}} {{outcome}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Java HTTP latency p95",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, job) (rate(http_server_requests_seconds_bucket[5m])))",
+          "refId": "A",
+          "legendFormat": "{{job}} {{operation}} {{outcome}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Java events processed",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "sum by(job) (rate(kafka_messages_processed_total[5m]))",
+          "refId": "A",
+          "legendFormat": "{{job}} {{operation}} {{outcome}}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Process resident memory",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "process_resident_memory_bytes",
+          "refId": "A",
+          "legendFormat": "{{job}} {{operation}} {{outcome}}"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Go goroutines",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 16,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "go_goroutines",
+          "refId": "A",
+          "legendFormat": "{{job}} {{operation}} {{outcome}}"
+        }
+      ]
+    }
+  ]
+}

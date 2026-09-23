@@ -1,0 +1,441 @@
+name: logicore-wms
+services:
+  warehouse-db:
+    image: postgres:16.9-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Run python3 scripts/init_env.py first}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run python3 scripts/init_env.py first}
+      POSTGRES_DB: warehouse
+    volumes:
+    - warehouse-db:/var/lib/postgresql/data
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+  product-db:
+    image: postgres:16.9-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Run python3 scripts/init_env.py first}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run python3 scripts/init_env.py first}
+      POSTGRES_DB: product
+    volumes:
+    - product-db:/var/lib/postgresql/data
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+  inventory-db:
+    image: postgres:16.9-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Run python3 scripts/init_env.py first}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run python3 scripts/init_env.py first}
+      POSTGRES_DB: inventory
+    volumes:
+    - inventory-db:/var/lib/postgresql/data
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+  placement-db:
+    image: postgres:16.9-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Run python3 scripts/init_env.py first}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run python3 scripts/init_env.py first}
+      POSTGRES_DB: placement
+    volumes:
+    - placement-db:/var/lib/postgresql/data
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+  reservation-db:
+    image: postgres:16.9-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Run python3 scripts/init_env.py first}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run python3 scripts/init_env.py first}
+      POSTGRES_DB: reservation
+    volumes:
+    - reservation-db:/var/lib/postgresql/data
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+  shipment-db:
+    image: postgres:16.9-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Run python3 scripts/init_env.py first}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run python3 scripts/init_env.py first}
+      POSTGRES_DB: shipment
+    volumes:
+    - shipment-db:/var/lib/postgresql/data
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+  audit-db:
+    image: postgres:16.9-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Run python3 scripts/init_env.py first}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run python3 scripts/init_env.py first}
+      POSTGRES_DB: audit
+    volumes:
+    - audit-db:/var/lib/postgresql/data
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+  kafka:
+    image: apache/kafka:3.9.1
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    volumes:
+    - kafka:/var/lib/kafka/data
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - /opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null
+      interval: 10s
+      timeout: 10s
+      retries: 30
+    restart: unless-stopped
+  kafka-init:
+    image: apache/kafka:3.9.1
+    depends_on:
+      kafka:
+        condition: service_healthy
+    volumes:
+    - ./infrastructure/kafka/create-topics.sh:/create-topics.sh:ro
+    entrypoint:
+    - /bin/bash
+    - /create-topics.sh
+    restart: 'no'
+  redis:
+    image: redis:7.4.2-alpine
+    command:
+    - redis-server
+    - --appendonly
+    - 'yes'
+    volumes:
+    - redis:/data
+    healthcheck:
+      test:
+      - CMD
+      - redis-cli
+      - ping
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+  warehouse-service:
+    build:
+      context: .
+      dockerfile: services/warehouse-service/Dockerfile
+    environment:
+      KAFKA_BROKERS: kafka:9092
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      WAREHOUSE_URL: http://warehouse-service:8080
+      PRODUCT_URL: http://product-service:8080
+      RESERVATION_URL: http://reservation-service:8080
+      DB_URL: jdbc:postgresql://warehouse-db:5432/warehouse
+      OTEL_ENDPOINT: http://otel-collector:4318/v1/traces
+    ports:
+    - 127.0.0.1:8081:8080
+    depends_on:
+      warehouse-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - wget -q -O - http://localhost:8080/health >/dev/null
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 45s
+    restart: unless-stopped
+    stop_grace_period: 30s
+  product-service:
+    build:
+      context: .
+      dockerfile: services/product-service/Dockerfile
+    environment:
+      KAFKA_BROKERS: kafka:9092
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      WAREHOUSE_URL: http://warehouse-service:8080
+      PRODUCT_URL: http://product-service:8080
+      RESERVATION_URL: http://reservation-service:8080
+      DB_URL: jdbc:postgresql://product-db:5432/product
+      OTEL_ENDPOINT: http://otel-collector:4318/v1/traces
+    ports:
+    - 127.0.0.1:8082:8080
+    depends_on:
+      product-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - wget -q -O - http://localhost:8080/health >/dev/null
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 45s
+    restart: unless-stopped
+    stop_grace_period: 30s
+  inventory-service:
+    build:
+      context: .
+      dockerfile: services/inventory-service/Dockerfile
+    environment:
+      KAFKA_BROKERS: kafka:9092
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      WAREHOUSE_URL: http://warehouse-service:8080
+      PRODUCT_URL: http://product-service:8080
+      RESERVATION_URL: http://reservation-service:8080
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@inventory-db:5432/inventory?sslmode=disable
+      REDIS_ADDR: redis:6379
+      OTEL_ENDPOINT: otel-collector:4318
+    ports:
+    - 127.0.0.1:8083:8080
+    depends_on:
+      inventory-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - wget -q -O - http://localhost:8080/health >/dev/null
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 45s
+    restart: unless-stopped
+    stop_grace_period: 30s
+  placement-service:
+    build:
+      context: .
+      dockerfile: services/placement-service/Dockerfile
+    environment:
+      KAFKA_BROKERS: kafka:9092
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      WAREHOUSE_URL: http://warehouse-service:8080
+      PRODUCT_URL: http://product-service:8080
+      RESERVATION_URL: http://reservation-service:8080
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@placement-db:5432/placement?sslmode=disable
+      REDIS_ADDR: redis:6379
+      OTEL_ENDPOINT: otel-collector:4318
+    ports:
+    - 127.0.0.1:8084:8080
+    depends_on:
+      placement-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - wget -q -O - http://localhost:8080/health >/dev/null
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 45s
+    restart: unless-stopped
+    stop_grace_period: 30s
+  reservation-service:
+    build:
+      context: .
+      dockerfile: services/reservation-service/Dockerfile
+    environment:
+      KAFKA_BROKERS: kafka:9092
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      WAREHOUSE_URL: http://warehouse-service:8080
+      PRODUCT_URL: http://product-service:8080
+      RESERVATION_URL: http://reservation-service:8080
+      DB_URL: jdbc:postgresql://reservation-db:5432/reservation
+      OTEL_ENDPOINT: http://otel-collector:4318/v1/traces
+    ports:
+    - 127.0.0.1:8085:8080
+    depends_on:
+      reservation-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - wget -q -O - http://localhost:8080/health >/dev/null
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 45s
+    restart: unless-stopped
+    stop_grace_period: 30s
+  shipment-service:
+    build:
+      context: .
+      dockerfile: services/shipment-service/Dockerfile
+    environment:
+      KAFKA_BROKERS: kafka:9092
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      WAREHOUSE_URL: http://warehouse-service:8080
+      PRODUCT_URL: http://product-service:8080
+      RESERVATION_URL: http://reservation-service:8080
+      DB_URL: jdbc:postgresql://shipment-db:5432/shipment
+      OTEL_ENDPOINT: http://otel-collector:4318/v1/traces
+    ports:
+    - 127.0.0.1:8086:8080
+    depends_on:
+      shipment-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - wget -q -O - http://localhost:8080/health >/dev/null
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 45s
+    restart: unless-stopped
+    stop_grace_period: 30s
+  audit-service:
+    build:
+      context: .
+      dockerfile: services/audit-service/Dockerfile
+    environment:
+      KAFKA_BROKERS: kafka:9092
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      WAREHOUSE_URL: http://warehouse-service:8080
+      PRODUCT_URL: http://product-service:8080
+      RESERVATION_URL: http://reservation-service:8080
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@audit-db:5432/audit?sslmode=disable
+      REDIS_ADDR: redis:6379
+      OTEL_ENDPOINT: otel-collector:4318
+    ports:
+    - 127.0.0.1:8087:8080
+    depends_on:
+      audit-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - wget -q -O - http://localhost:8080/health >/dev/null
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 45s
+    restart: unless-stopped
+    stop_grace_period: 30s
+  prometheus:
+    image: prom/prometheus:v3.2.1
+    volumes:
+    - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    - prometheus:/prometheus
+    ports:
+    - 127.0.0.1:9090:9090
+  grafana:
+    image: grafana/grafana:11.6.0
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:?Run python3 scripts/init_env.py
+        first}
+    volumes:
+    - ./infrastructure/grafana/provisioning:/etc/grafana/provisioning:ro
+    - ./infrastructure/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    - grafana:/var/lib/grafana
+    ports:
+    - 127.0.0.1:3000:3000
+  jaeger:
+    image: jaegertracing/all-in-one:1.68.0
+    ports:
+    - 127.0.0.1:16686:16686
+    environment:
+      COLLECTOR_OTLP_ENABLED: 'true'
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.123.0
+    command:
+    - --config=/etc/otel/config.yml
+    volumes:
+    - ./infrastructure/otel/config.yml:/etc/otel/config.yml:ro
+    depends_on:
+    - jaeger
+volumes:
+  warehouse-db: {}
+  product-db: {}
+  inventory-db: {}
+  placement-db: {}
+  reservation-db: {}
+  shipment-db: {}
+  audit-db: {}
+  kafka: {}
+  redis: {}
+  prometheus: {}
+  grafana: {}

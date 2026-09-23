@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+**/target/
+**/coverage*
+**/*.log
+__pycache__/
+.DS_Store
+.idea/
+.vscode/
+demo-result.json

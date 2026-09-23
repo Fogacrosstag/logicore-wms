@@ -25,6 +25,7 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     listener:
       ack-mode: record
+
 management:
   endpoints:
     web:
@@ -45,15 +46,13 @@ management:
     sampling:
       probability: 1.0
   otlp:
-    metrics:
-    distribution:
-      percentiles-histogram:
-        http.server.requests: true
-  tracing:
+    tracing:
       endpoint: ${OTEL_ENDPOINT:http://otel-collector:4318/v1/traces}
+
 logging:
   structured:
     format:
       console: logstash
+
 server:
   shutdown: graceful

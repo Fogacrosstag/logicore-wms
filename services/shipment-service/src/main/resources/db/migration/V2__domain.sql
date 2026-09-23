@@ -1,0 +1,1 @@
+CREATE TABLE shipments(id uuid PRIMARY KEY,created_at timestamptz NOT NULL,updated_at timestamptz NOT NULL,version bigint NOT NULL,warehouse_id uuid,reservation_id uuid,status text,items jsonb,reason text,UNIQUE(reservation_id));

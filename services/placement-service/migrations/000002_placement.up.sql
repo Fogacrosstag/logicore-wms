@@ -1,0 +1,2 @@
+CREATE TABLE placement_jobs(stock_id uuid PRIMARY KEY,warehouse_id uuid NOT NULL,payload jsonb NOT NULL,status text NOT NULL DEFAULT 'PENDING',attempts integer NOT NULL DEFAULT 0,next_attempt timestamptz NOT NULL DEFAULT now(),last_error text,location_id uuid,score float8,updated_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX placement_due ON placement_jobs(next_attempt) WHERE status='PENDING';

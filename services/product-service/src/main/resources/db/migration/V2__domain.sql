@@ -1,0 +1,1 @@
+CREATE TABLE products(id uuid PRIMARY KEY,created_at timestamptz NOT NULL,updated_at timestamptz NOT NULL,version bigint NOT NULL,sku text,name text,description text,category text,barcode text,weight float8,length float8,width float8,height float8,volume float8,storage_type text,active boolean,UNIQUE(sku),CHECK(weight>0 AND volume>0 AND length>0 AND width>0 AND height>0));

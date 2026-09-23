@@ -1,0 +1,1 @@
+CREATE TABLE reservations(id uuid PRIMARY KEY,created_at timestamptz NOT NULL,updated_at timestamptz NOT NULL,version bigint NOT NULL,warehouse_id uuid,status text,expires_at timestamptz,items jsonb,reason text);
